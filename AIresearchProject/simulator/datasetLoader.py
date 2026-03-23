@@ -3,6 +3,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+import ast
 from pandas.core import col
 
 
@@ -24,28 +25,35 @@ class datasetLoader:
         if self.numericData.empty:
             raise ValueError("No numeric data found")
 
+        #print("In full dataframe columns?", "average_usage" in self.data.columns)
+        #print("In numeric dataframe columns?", "average_usage" in self.numericData.columns)
+        #print(self.data.dtypes)
+
         self.workloadCol = self.resWorkload(workloadData)
+
+        self.data[self.workloadCol] = self.data[self.workloadCol].apply(lambda x: ast.literal_eval(x)['cpus'] if isinstance(x, str) else 0.0)
+
         self.workloadSig = self.workloadSignal()
 
     def resWorkload(self, workloadData: Optional[str] = None):
         if workloadData is not None:
-            if workloadData not in self.numericData.columns:
-                raise ValueError(f"'{workloadData}'not found")
+            if workloadData not in self.data.columns:
+                raise ValueError(f"'{workloadData}'not found. Available columns: {list(self.data.columns)}")
             return workloadData
 
-        colNames = {"cpu_usage", "cpu", "cpu_utilization", "mean_cpu_usage_rate", "resource_request", "resource_usage", "load", "usage"}
+        colNames = {"cpu_usage", "cpu", "cpu_utilization", "mean_cpu_usage_rate", "resource_request", "resource_usage", "load", "usage", "average_usage"}
 
-        lowerMap = {col.lower(): col for col in self.numericData.columns}
+        lowerMap = {col.lower(): col for col in self.data.columns}
 
         for name in colNames:
             if name in lowerMap:
                 return lowerMap[name]
 
-        return self.numericData.columns[0]
+        return self.data.columns[0]
 
     def workloadSignal(self) -> np.ndarray:
 
-        series = self.numericData[self.workloadCol].astype(float).fillna(0.0).to_numpy()
+        series = self.data[self.workloadCol].astype(float).fillna(0.0).to_numpy()
 
         minValue = np.min(series)
         maxValue = np.max(series)
@@ -53,7 +61,7 @@ class datasetLoader:
         if maxValue == minValue:
             return np.zeros_like(series, dtype=np.float32)
 
-        normalize =  (series - minValue) / (maxValue - minValue)
+        normalize = (series - minValue) / (maxValue - minValue)
 
         return normalize.astype(np.float32)
 
@@ -86,7 +94,7 @@ class datasetLoader:
 #print("Numeric columns:", loader.numericCols()[:10])
 #print(loader.preview())
 
-# _ in range(10):
+#for _ in range(10):
 #    print(loader.nextLoad())
 
 #print(loader.data["average_usage"].min())

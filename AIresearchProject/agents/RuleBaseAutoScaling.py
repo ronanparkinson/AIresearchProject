@@ -1,19 +1,20 @@
 from env.RLautoscalingProto import RLautoscalingProto
 
 class RuleBaseAutoScaling:
-  def __init__(self, scaleUpThreshold=0.75, scaleDownThreshold=0.35):
+  def __init__(self, scaleUpThreshold=0.7, scaleDownThreshold=0.3, queueTh=0.6):
     self.scaleUpThreshold = scaleUpThreshold
     self.scaleDownThreshold = scaleDownThreshold
+    self.queueTh = queueTh
 
   def requiredAction(self, state):
     ingestedWorkLoad, cpu, queue, instances = state
 
     if cpu > self.scaleUpThreshold:
       return 2
-
-    elif cpu < self.scaleDownThreshold:
+    elif queue > self.queueTh:
+        return 2
+    elif cpu < self.scaleDownThreshold and queue < 0.2:
       return 0
-
     else:
       return 1
 

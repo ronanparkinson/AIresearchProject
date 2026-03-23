@@ -2,9 +2,9 @@ from stable_baselines3 import PPO
 from env.RLautoscalingProto import RLautoscalingProto
 
 class ppoEvaluation:
-    def __init__(self, modelPath="../training/PPOscaler"):
+    def __init__(self, modelPath="../training/PPOscaler", rewardVersion="v1"):
         self.model = PPO.load(modelPath)
-        self.env = RLautoscalingProto()
+        self.env = RLautoscalingProto(rewardVersion=rewardVersion)
 
     def run(self, steps=200):
         state, _ = self.env.reset()
@@ -21,8 +21,8 @@ class ppoEvaluation:
             if action != 1:
                 scalingActions += 1
 
-            state, reward, done, truncated, info = self.env.step(action)
-            workload, cpu, queue, instances = state
+            state, reward, done, truncated, info = self.env.step(int(action))
+            cpu, workload, queue, instances = state
 
             totalReward += reward
             totalQueue += queue

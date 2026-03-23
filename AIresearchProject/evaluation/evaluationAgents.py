@@ -1,8 +1,8 @@
 from env.RLautoscalingProto import RLautoscalingProto
 from agents.RuleBaseAutoScaling import RuleBaseAutoScaling
 
-def evaluationAgents(steps=200):
-    env = RLautoscalingProto()
+def evaluationAgents(steps=200, rewardVersion="v1"):
+    env = RLautoscalingProto(rewardVersion=rewardVersion)
     agent = RuleBaseAutoScaling()
 
     state, _ = env.reset()
