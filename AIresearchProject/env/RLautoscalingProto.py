@@ -5,7 +5,7 @@ from stable_baselines3 import PPO
 from simulator.workloadSimulator import workloadSimulator
 
 class RLautoscalingProto(gym.Env):
-    def __init__(self, datapath="../data/borg_traces_data.csv", workloadData="average_usage", rewardVersion="v1"):
+    def __init__(self, datapath="data/borg_traces_data.csv", workloadData="average_usage", rewardVersion="v1"):
         super().__init__()
         self.workload = workloadSimulator(datapath, workloadData)
         self.rewardVersion = rewardVersion
@@ -86,14 +86,14 @@ print("RLautoscalingProto testing starting")
 #import numpy as np
 #from env.RLautoscalingProto import RLautoscalingProto
 
-env = RLautoscalingProto()
+#env = RLautoscalingProto()
 
-state, _ = env.reset()
-print("Initial state:", state)
+#state, _ = env.reset()
+#print("Initial state:", state)
 
-for step in range(20):
-    action = np.random.choice([0, 1, 2])
-    state, reward, done, truncated, info = env.step(action)
-    print(f"Step {step}: action={action}, state={state}, reward={reward:.4f}")
+#for step in range(20):
+ #   action = np.random.choice([0, 1, 2])
+ #   state, reward, done, truncated, info = env.step(action)
+ #   print(f"Step {step}: action={action}, state={state}, reward={reward:.4f}")
 
-print("RLautoscalingProto testing finishing")
+#print("RLautoscalingProto testing finishing")

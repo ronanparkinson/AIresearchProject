@@ -6,7 +6,7 @@ class ppoEvaluation:
         self.model = PPO.load(modelPath)
         self.env = RLautoscalingProto(rewardVersion=rewardVersion)
 
-    def run(self, steps=200):
+    def run(self, steps=200, giveHistory=False):
         state, _ = self.env.reset()
 
         totalReward = 0
@@ -14,6 +14,13 @@ class ppoEvaluation:
         totalCpu = 0
         totalInstances = 0
         scalingActions = 0
+
+        past = {
+            "rewardPast": [],
+            "QueuePast": [],
+            "CpuPast": [],
+            "instancePast": []
+        }
 
         for _ in range(steps):
             action, _ = self.model.predict(state, deterministic=True)
@@ -29,10 +36,19 @@ class ppoEvaluation:
             totalCpu += cpu
             totalInstances += instances
 
-        return {
-            "reward": totalReward,
-            "average queue": totalQueue / steps,
-            "average cpu": totalCpu / steps,
-            "average instances": totalInstances / steps,
-            "scaling actions": scalingActions
+            past["rewardPast"].append(float(reward))
+            past["QueuePast"].append(float(queue))
+            past["CpuPast"].append(float(cpu))
+            past["instancePast"].append(float(instances))
+
+            if done or truncated:
+                break
+
+        stats = {
+            "reward": float(totalReward),
+            "average queue": float(totalQueue / steps),
+            "average cpu": float(totalCpu / steps),
+            "average instances": float(totalInstances / steps),
+            "scaling actions": int(scalingActions)
         }
+        return stats, past
